@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "outDir": "js",
+    "target": "esnext",
+    "strict": true,
+  },
+  "include": [
+    "src/**/*",
+  ]
+}
