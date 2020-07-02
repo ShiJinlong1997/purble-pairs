@@ -1,4 +1,13 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 const cardTypeCountDic = {
     apple: 0,
     pear: 0,
@@ -84,19 +93,19 @@ function setCardType(card) {
     card.classList.add(cardType);
     card.dataset.cardType = cardType;
 }
-async function init() {
-    const fragment = document.createDocumentFragment();
-    for (let row = 0; row < countRows; ++row) {
-        alert(row);
-        for (let col = 0; col < countCols; ++col) {
-            fragment.appendChild(createCard(row, col));
+function init() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const fragment = document.createDocumentFragment();
+        for (let row = 0; row < countRows; ++row) {
+            for (let col = 0; col < countCols; ++col) {
+                fragment.appendChild(createCard(row, col));
+            }
         }
-    }
-    blackboard.appendChild(fragment);
-    alert(blackboard.children.length);
-    selectAble = false;
-    await waitCardRotate();
-    selectAble = true;
+        blackboard.appendChild(fragment);
+        selectAble = false;
+        yield waitCardRotate();
+        selectAble = true;
+    });
 }
 function restart() {
     restartBtn.classList.add('hide');
@@ -105,99 +114,109 @@ function restart() {
     }
     init();
 }
-async function handleSelect(event) {
-    if (!selectAble) {
-        return;
-    }
-    const eventTarget = getEventPath(event)
-        .filter(item => Reflect.has(item, 'classList'))
-        .find(item => item.classList.contains('card'));
-    if (!eventTarget) {
-        return;
-    }
-    // 切换向上面
-    const isShowFront = eventTarget.classList.toggle('showfront');
-    selectAble = false;
-    await waitCardRotate();
-    selectAble = true;
-    // 若正面向上则记录此卡,否则删除记录
-    isShowFront
-        ? selectedCards.push(eventTarget)
-        : selectedCards.splice(selectedCards.findIndex(item => item.id == eventTarget.id), 1);
-    // 防止仅剩一张卡
-    const existCards = getExistCards();
-    if (1 == existCards.length) {
-        handleLastOneCard(existCards[0]);
-        return;
-    }
-    if (2 != selectedCards.length) {
-        return;
-    }
-    // 若已有两张卡正面向上,则判断是否相同
-    // 若相同则消除,否则判断是否有幸运卡
-    // 若有幸运卡则翻转一张同类卡后消除这三张卡
-    // 否则两张卡反面向上
-    // 消除完卡片后若只剩一张卡必为幸运卡,正面向上后消除
-    const isSame = selectedCards[0].dataset.cardType == selectedCards[1].dataset.cardType;
-    isSame
-        ? removeSelectedCards()
-        : handleSelectedCards();
+function handleSelect(event) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!selectAble) {
+            return;
+        }
+        const eventTarget = getEventPath(event)
+            .filter(item => Reflect.has(item, 'classList'))
+            .find(item => item.classList.contains('card'));
+        if (!eventTarget) {
+            return;
+        }
+        // 切换向上面
+        const isShowFront = eventTarget.classList.toggle('showfront');
+        selectAble = false;
+        yield waitCardRotate();
+        selectAble = true;
+        // 若正面向上则记录此卡,否则删除记录
+        isShowFront
+            ? selectedCards.push(eventTarget)
+            : selectedCards.splice(selectedCards.findIndex(item => item.id == eventTarget.id), 1);
+        // 防止仅剩一张卡
+        const existCards = getExistCards();
+        if (1 == existCards.length) {
+            handleLastOneCard(existCards[0]);
+            return;
+        }
+        if (2 != selectedCards.length) {
+            return;
+        }
+        // 若已有两张卡正面向上,则判断是否相同
+        // 若相同则消除,否则判断是否有幸运卡
+        // 若有幸运卡则翻转一张同类卡后消除这三张卡
+        // 否则两张卡反面向上
+        // 消除完卡片后若只剩一张卡必为幸运卡,正面向上后消除
+        const isSame = selectedCards[0].dataset.cardType == selectedCards[1].dataset.cardType;
+        isSame
+            ? removeSelectedCards()
+            : handleSelectedCards();
+    });
 }
 function getExistCards() {
     return [...cards].filter(item => !item.classList.contains('hide'));
 }
-async function handleLastOneCard(card) {
-    card.classList.add('showfront');
-    selectAble = false;
-    await waitCardRotate();
-    card.classList.add('hide');
-    await waitCardRotate();
-    selectAble = true;
-    // 卡片全消除，能重开游戏了
-    restartBtn.classList.remove('hide');
+function handleLastOneCard(card) {
+    return __awaiter(this, void 0, void 0, function* () {
+        card.classList.add('showfront');
+        selectAble = false;
+        yield waitCardRotate();
+        card.classList.add('hide');
+        yield waitCardRotate();
+        selectAble = true;
+        // 卡片全消除，能重开游戏了
+        restartBtn.classList.remove('hide');
+    });
 }
 function waitCardRotate() {
     return new Promise(resolve => {
         setTimeout(resolve, cardTransitionDuration);
     });
 }
-async function removeSelectedCards() {
-    selectedCards.forEach(item => {
-        item.classList.add('hide');
+function removeSelectedCards() {
+    return __awaiter(this, void 0, void 0, function* () {
+        selectedCards.forEach(item => {
+            item.classList.add('hide');
+        });
+        selectedCards.length = 0;
+        selectAble = false;
+        yield waitCardRotate();
+        selectAble = true;
+        const existCards = getExistCards();
+        if (1 < existCards.length) {
+            return;
+        }
+        1 == existCards.length
+            ? handleLastOneCard(existCards[0])
+            : restartBtn.classList.remove('hide');
     });
-    selectedCards.length = 0;
-    selectAble = false;
-    await waitCardRotate();
-    selectAble = true;
-    const existCards = getExistCards();
-    if (1 < existCards.length) {
-        return;
-    }
-    1 == existCards.length
-        ? handleLastOneCard(existCards[0])
-        : restartBtn.classList.remove('hide');
 }
-async function hideSelectedCards() {
-    selectedCards.forEach(item => {
-        item.classList.remove('showfront');
+function hideSelectedCards() {
+    return __awaiter(this, void 0, void 0, function* () {
+        selectedCards.forEach(item => {
+            item.classList.remove('showfront');
+        });
+        selectedCards.length = 0;
+        selectAble = false;
+        yield waitCardRotate();
+        selectAble = true;
     });
-    selectedCards.length = 0;
-    selectAble = false;
-    await waitCardRotate();
-    selectAble = true;
 }
-async function selectSameTypeCard(luckyTypeCardIdx) {
-    // 普通卡下标 0 或 1
-    const normalTypeCardIdx = selectedCards.length - 1 - luckyTypeCardIdx;
-    const normalTypeCard = selectedCards[normalTypeCardIdx];
-    const sameType = normalTypeCard.dataset.cardType;
-    const sameTypeCard = [...cards].find(item => item.classList.contains(sameType) && !item.classList.contains('showfront'));
-    sameTypeCard.classList.add('showfront');
-    selectedCards.push(sameTypeCard);
-    selectAble = false;
-    await waitCardRotate();
-    selectAble = true;
-    removeSelectedCards();
+function selectSameTypeCard(luckyTypeCardIdx) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // 普通卡下标 0 或 1
+        const normalTypeCardIdx = selectedCards.length - 1 - luckyTypeCardIdx;
+        const normalTypeCard = selectedCards[normalTypeCardIdx];
+        const sameType = normalTypeCard.dataset.cardType;
+        const sameTypeCard = [...cards].find(item => item.classList.contains(sameType) && !item.classList.contains('showfront'));
+        sameTypeCard.classList.add('showfront');
+        selectedCards.push(sameTypeCard);
+        selectAble = false;
+        yield waitCardRotate();
+        selectAble = true;
+        removeSelectedCards();
+    });
 }
 function handleSelectedCards() {
     const luckyTypeCardIdx = selectedCards.findIndex(item => item.dataset.cardType == 'lucky');
