@@ -108,11 +108,13 @@ function setCardType(card: HTMLDivElement): void {
 async function init(): Promise<void> {
   const fragment: DocumentFragment = document.createDocumentFragment();
   for (let row = 0; row < countRows; ++row) {
+    alert(row);
     for (let col = 0; col < countCols; ++col) {
       fragment.appendChild(createCard(row, col));
     }
   }
   blackboard.appendChild(fragment);
+  alert(blackboard.children.length)
   
   selectAble = false;
   await waitCardRotate();
