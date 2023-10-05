@@ -52,6 +52,10 @@ function DataList() {
   );
 }
 
+function RestartBtnHTML() {
+  return `<button id="restartBtn" hidden @click="restart();">重新开始</button>`;
+}
+
 function LabelHTML(type, i) {
   const Pos = i => ({
     row: Math.floor(i / game.mapSize),
@@ -149,10 +153,10 @@ async function handleChange(event) {
   game.cardElems.forEach(elem => elem.firstElementChild.disabled = false);
 
   // 两两一对都退场，剩下的只能是幸运卡
-  if (1 == blackboard.children.length) {
-    // foo(pipe( () => blackboard.children[0], selectCard, () => wait(500), out ));
+  if (1 == blackboard.childElementCount) {
+    // foo(pipe( () => blackboard.firstElementChild, selectCard, () => wait(500), out ));
     game.cardElems.forEach(elem => elem.firstElementChild.disabled = true);
-    selectCard(blackboard.children[0]);
+    selectCard(blackboard.firstElementChild);
     await wait(500);
     out();
     await wait(500);
@@ -164,11 +168,7 @@ async function handleChange(event) {
 
 function init() {
   const blackboard = document.getElementById('blackboard');
-  blackboard.innerHTML = R.addIndex(R.reduce)(
-    (result, type, i) => result + LabelHTML(type, i),
-    '',
-    DataList(),
-  );
+  blackboard.innerHTML = DataList().reduce((result, type, i) => result + LabelHTML(type, i), '') + RestartBtnHTML();
 }
 
 function main() {
