@@ -53,7 +53,7 @@ function DataList() {
 }
 
 function RestartBtnHTML() {
-  return `<button id="restartBtn" hidden @click="restart();">重新开始</button>`;
+  return `<button id="restartBtn" hidden onclick="restart();">重新开始</button>`;
 }
 
 function LabelHTML(type, i) {
