@@ -1,0 +1,99 @@
+body { margin: 0; }
+
+#blackboard {
+  --gap: 10px;
+  --card-size: 40px;
+  position: relative;
+  width: calc(var(--card-size) * 5 + var(--gap) * 6);
+  height: auto;
+  margin-top: 3%;
+  margin-inline: auto;
+  border: 12px solid #e4c27a;
+  border-radius: 8px;
+  box-shadow: 0 0 0 2px #fee2b5,
+              0 0 0 4px #c39f6f;
+  background: #8daf9f;
+  outline: 2px solid #c09e75;
+  outline-offset: -10px;
+
+  &::before {
+    content: '';
+    display: block;
+    width: 100%;
+    padding-top: 100%;
+  }
+}
+
+.card {
+  position: absolute;
+  width: var(--card-size);
+  height: var(--card-size);
+  animation: card-in .5s linear both;
+
+  &:hover { opacity: .9; }
+
+  & > input[type="checkbox"]:checked ~ .back { transform: rotateY(180deg); }
+  & > input[type="checkbox"]:checked ~ .front { transform: rotateY(0); }
+
+  & > div {
+    --bg-pos-y: calc(-1 * var(--order) * var(--card-size));
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #eee url(./img/sprite.png) no-repeat;
+    background-position: center var(--bg-pos-y);
+    backface-visibility: hidden;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px #9785cf;
+    transition: transform .5s linear;
+    cursor: pointer;
+  }
+
+  & > .front { transform: rotateY(180deg); }
+  & > .back {
+    --order: 5;
+    transform: rotateY(0);
+  }
+}
+
+.card.out { animation: card-out .5s linear both; }
+
+.card[data-type="lucky"] > div { box-shadow: 0 1px 2px #4fde49; }
+.card[data-type="lucky"] > .front {
+  --order: 0;
+  background-color: #cfc;
+}
+.card[data-type="apple"] > .front { --order: 1; }
+.card[data-type="pear"] > .front { --order: 2 }
+.card[data-type="lemon"] > .front { --order: 3; }
+.card[data-type="watermelon"] > .front { --order: 4; }
+
+#restartBtn {
+  position: absolute;
+  top: 150px;
+  inset-inline: 0;
+  width: 6em;
+  height: 2.5em;
+  border: none;
+  margin: auto;
+  font-size: 1.2em;
+  color: #fff;
+  background: #58a linear-gradient(hsla(0,0%,100%,.2), transparent);
+  border-radius: 8px;
+  text-shadow: 0 -1px 1px #000;
+  cursor: pointer;
+  user-select: none;
+}
+
+@keyframes card-in {
+  0% { transform: scale(0); }
+  80% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+@keyframes card-out {
+  20% { transform: scale(1.2); }
+  100% { transform: scale(0); }
+}
