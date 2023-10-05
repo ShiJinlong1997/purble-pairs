@@ -8,8 +8,8 @@ body { margin: 0; }
   height: auto;
   margin-top: 3%;
   margin-inline: auto;
-  border: 12px solid #e4c27a;
-  border-radius: 8px;
+  border: 10px solid #e4c27a;
+  border-radius: 10px;
   box-shadow: 0 0 0 2px #fee2b5,
               0 0 0 4px #c39f6f;
   background: #8daf9f;
