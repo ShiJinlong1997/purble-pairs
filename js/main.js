@@ -1,21 +1,3 @@
-// --- const ---
-
-const game = {
-  /** @type {HTMLCollectionOf<HTMLLabelElement>} */
-  cards: document.getElementsByClassName('card'),
-  get cardElems() { return Array.from(this.cards) },
-  mapSize: 5,
-  gap: 10,
-  cardSize: 40,
-  typeTotal: { apple: 6, pear: 6, lemon: 6, watermelon: 6, lucky: 1 },
-};
-
-const state = {
-  /** @type {Set<HTMLLabelElement>} */
-  cards: new Set(),
-  get cardElems() { return Array.from(this.cards); }
-};
-
 // --- tool ---
 
 function pipe(...fns) {
@@ -32,6 +14,35 @@ const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 const allSame = xs => R.all(R.equals(R.head(xs)), xs);
 const isType = R.pathEq(R.__, ['dataset', 'type']);
 const isOut = elem => elem.classList.contains('out');
+
+// --- const ---
+
+const game = {
+  /** @type {HTMLDivElement} */
+  blackboard: document.getElementById('blackboard'),
+
+  /** @type {HTMLCollectionOf<HTMLLabelElement>} */
+  cards: document.getElementsByClassName('card'),
+
+  get cardElems() {
+    return Array.from(this.cards);
+  },
+
+  get stayCardCount() {
+    return R.compose( R.length, R.filter(R.compose( R.not, isOut )) )(this.cardElems);
+  },
+
+  mapSize: 5,
+  gap: 10,
+  cardSize: 40,
+  typeTotal: { apple: 6, pear: 6, lemon: 6, watermelon: 6, lucky: 1 },
+};
+
+const state = {
+  /** @type {Set<HTMLLabelElement>} */
+  cards: new Set(),
+  get cardElems() { return Array.from(this.cards); }
+};
 
 // --- core ---
 
@@ -153,10 +164,11 @@ async function handleChange(event) {
   game.cardElems.forEach(elem => elem.firstElementChild.disabled = false);
 
   // 两两一对都退场，剩下的只能是幸运卡
-  if (1 == blackboard.childElementCount) {
-    // foo(pipe( () => blackboard.firstElementChild, selectCard, () => wait(500), out ));
+  if (1 == game.stayCardCount) {
+    // foo(pipe( () => luckyCard, selectCard, () => wait(500), out ));
+    const luckyCard = R.find(isType('lucky'), game.cardElems);
     game.cardElems.forEach(elem => elem.firstElementChild.disabled = true);
-    selectCard(blackboard.firstElementChild);
+    selectCard(luckyCard);
     await wait(500);
     out();
     await wait(500);
@@ -167,8 +179,7 @@ async function handleChange(event) {
 }
 
 function init() {
-  const blackboard = document.getElementById('blackboard');
-  blackboard.innerHTML = DataList().reduce((result, type, i) => result + LabelHTML(type, i), '') + RestartBtnHTML();
+  game.blackboard.innerHTML = DataList().reduce((result, type, i) => result + LabelHTML(type, i), '') + RestartBtnHTML();
 }
 
 function main() {
