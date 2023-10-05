@@ -5,7 +5,7 @@ body { margin: 0; }
   --card-size: 40px;
   position: relative;
   width: calc(var(--card-size) * 5 + var(--gap) * 6);
-  height: auto;
+  height: calc(var(--card-size) * 5 + var(--gap) * 6);
   margin-top: 3%;
   margin-inline: auto;
   border: 12px solid #e4c27a;
@@ -15,13 +15,6 @@ body { margin: 0; }
   background: #8daf9f;
   outline: 2px solid #c09e75;
   outline-offset: -10px;
-
-  &::before {
-    content: '';
-    display: block;
-    width: 100%;
-    padding-top: 100%;
-  }
 }
 
 .card {
