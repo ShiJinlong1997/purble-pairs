@@ -122,7 +122,8 @@ function findSameTypeCard() {
   const normalCard = R.find(R.compose( R.not, isType('lucky') ), state.cardElems);
   const sameTypeCard = R.compose(
     R.find(isType(normalCard.dataset.type)),
-    R.filter(R.compose(R.not, R.equals(normalCard)))
+    R.filter(R.compose( R.not, isOut )),
+    R.filter(R.compose( R.not, R.equals(normalCard) ))
   )(game.cardElems);
 
   return sameTypeCard;
@@ -143,7 +144,7 @@ async function handleChange(event) {
   await wait(500);
 
   if (2 == state.cardElems.length) {
-    R.cond([
+    await R.cond([
       [
         R.any(isType('lucky')),
         pipe( findSameTypeCard, selectCard, () => wait(500), out ),
@@ -157,7 +158,7 @@ async function handleChange(event) {
         backUp,
       ],
     ])(state.cardElems);
-  
+
     await wait(500);
   }
 
