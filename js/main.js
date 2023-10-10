@@ -1,14 +1,8 @@
 // --- tool ---
 
-function pipe(...fns) {
-  return (...args) => {
-    return fns.reduce(async (acc, fn) => {
-      const result = await acc;
-      return fn(result);
-    }, Promise.resolve(args));
-  };
-}
-
+const pipe = (...fns) => fns.reduce(
+  (prevFn, currFn) => async(...xs) => currFn(await prevFn(...xs))
+);
 
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 const allSame = xs => R.all(R.equals(R.head(xs)), xs);
@@ -46,7 +40,13 @@ const state = {
 
 // --- core ---
 
-function DataList() {
+function setRotatable(enable) {
+  game.cardElems.forEach(elem => elem.firstElementChild.disabled = !enable);
+}
+
+const LabelsHTML = xs => xs.reduce((result, type, i) => result + LabelHTML(type, i), '');
+
+function TypeList() {
   const rndNum = max => Math.floor(Math.random() * max);
   
   function rndItem(validator, xs) {
@@ -129,58 +129,52 @@ function findSameTypeCard() {
   return sameTypeCard;
 }
 
-// async function foo(f) {
-//   game.cardElems.forEach(elem => elem.firstElementChild.disabled = true);
-//   await f();
-//   await wait(500);
-//   state.cardElems.forEach(elem => elem.firstElementChild.checked = false);
-// }
-
 async function handleChange(event) {
   const action = event.currentTarget.checked ? 'add' : 'delete';
   state.cards[action](event.currentTarget.parentElement);
 
-  game.cardElems.forEach(elem => elem.firstElementChild.disabled = true);
+  setRotatable(false);
   await wait(500);
 
   if (2 == state.cardElems.length) {
     await R.cond([
       [
         R.any(isType('lucky')),
-        pipe( findSameTypeCard, selectCard, () => wait(500), out ),
+        pipe( findSameTypeCard, selectCard, () => wait(500), out, () => wait(500) ),
       ],
       [
         R.pipe( R.map(R.path(['dataset', 'type'])), allSame ),
-        out,
+        pipe( out, () => wait(500) ),
       ],
       [
         R.T,
-        backUp,
+        pipe( backUp, () => wait(500) ),
       ],
     ])(state.cardElems);
-
-    await wait(500);
   }
 
-  game.cardElems.forEach(elem => elem.firstElementChild.disabled = false);
+  setRotatable(true);
 
   // 两两一对都退场，剩下的只能是幸运卡
   if (1 == game.stayCardCount) {
-    // foo(pipe( () => luckyCard, selectCard, () => wait(500), out ));
     const luckyCard = R.find(isType('lucky'), game.cardElems);
-    game.cardElems.forEach(elem => elem.firstElementChild.disabled = true);
-    selectCard(luckyCard);
-    await wait(500);
-    out();
-    await wait(500);
-    state.cardElems.forEach(elem => elem.firstElementChild.checked = false);
+    setRotatable(false);
+    await pipe( selectCard, () => wait(500), out, () => wait(500) )(luckyCard);
+    setRotatable(true);
   }
 
   R.all(isOut, game.cardElems) && setRestartBtn('visible');
 }
 
 function init() {
-  game.blackboard.innerHTML = DataList().reduce((result, type, i) => result + LabelHTML(type, i), '') + RestartBtnHTML();
+  game.blackboard.innerHTML = RestartBtnHTML() + R.compose(LabelsHTML, TypeList)();
+
+  // 比如 backUp 若干卡 transition 都记录要等待，等都 transitionend 再 checkbox.disabled=false
+  // 第一张正面向上 wait transition >> game.cardElems all are enabled
+  // 第二张正面向上 game.cardElems all are disabled
+  // 幸运则翻 又一同类卡 wait transition >> wait out        >> game.cardElems all to enable
+  // 相同，             out             >> wait anim end   >> game.cardElems all to enable
+  // 不同，             backup          >> wait transition >> game.cardElems all to enable
 }
 
 function main() {
